@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-DATABASE = '/storage/emulated/0/DCIM/whitenet/messenger.db'
+DATABASE = 'messenger.db'
 
 # Функция для создания базы данных и таблиц (если не существует)
 def init_db():
