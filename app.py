@@ -63,7 +63,9 @@ def register():
         password = request.form['password']
         cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
         db.commit()
-        return redirect('/login')
+        session['user_id'] = cursor.lastrowid
+        session['username'] = username
+        return redirect('/lobby')
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
