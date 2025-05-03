@@ -5,13 +5,52 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+# Подключение к MySQL
 db = mysql.connector.connect(
     host="sql7.freesqldatabase.com",
     user="sql7776627",
-    password="CA4yivwFEt",
+    password="CA4yivwFEt",  # замени на свой пароль
     database="sql7776627"
 )
 cursor = db.cursor(dictionary=True)
+
+# Функция инициализации БД
+def init_db():
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(100) UNIQUE,
+            password VARCHAR(100)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS chat_rooms (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100),
+            password VARCHAR(100)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            chat_id INT,
+            user_id INT,
+            text TEXT,
+            timestamp DATETIME,
+            FOREIGN KEY (chat_id) REFERENCES chat_rooms(id),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+    cursor.execute("SELECT COUNT(*) AS count FROM chat_rooms")
+    count = cursor.fetchone()['count']
+    if count == 0:
+        cursor.execute("INSERT INTO chat_rooms (name, password) VALUES (%s, %s)", ("школа", "7z"))
+        cursor.execute("INSERT INTO chat_rooms (name, password) VALUES (%s, %s)", ("домик", "1234"))
+        cursor.execute("INSERT INTO chat_rooms (name, password) VALUES (%s, %s)", ("developer", "code"))
+    db.commit()
+
+# Вызов инициализации
+init_db()
 
 @app.route('/')
 def index():
