@@ -1,5 +1,4 @@
-flask
-flask_session
+Flask
+Flask-MySQLdb
+Flask-Session
 gunicorn
-paramiko
-pymysql
