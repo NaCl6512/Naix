@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чат: {{ chat_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .center-box {
+            width: 100%;
+            max-width: 100%;
+            height: calc(100vh - 80px);
+            margin: 0;
+            padding: 0;
+            background-color: #f3f3f3;
+            border-radius: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .chat-box {
+            width: 97%;
+            margin: 0 auto 10px auto;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        .msg {
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            font-size: 1.1em;
+            line-height: 1.4;
+            border-radius: 12px;
+            background-color: #f8f8f8;
+            color: #333;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .mine {
+            background-color: #d1e7dd;
+        }
+
+        .other {
+            background-color: #f8d7da;
+        }
+
+        form {
+            width: 100%;
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        form input[type="text"],
+        form button {
+            width: 95%;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 17px;
+            border: none;
+            display: block;
+        }
+
+        form input[type="text"] {
+            background: #ffffffcc;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+
+        form button {
+            background: #4facfe;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        form button:hover {
+            background: #00f2fe;
+        }
+
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-box">
+        <div class="chat-header">
+            Добро пожаловать в {{ chat_name }}
+        </div>
+
+        <div class="chat-box" id="chat">
+            {% for user, text in messages %}
+                {% if user == session['username'] %}
+                    <div class="msg mine">{{ text }}</div>
+                {% else %}
+                    <div class="msg other"><strong>{{ user }}:</strong> {{ text }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <form id="sendForm">
+            <input type="text" id="msg" placeholder="Ваше сообщение" required>
+            <button type="submit">Отправить</button>
+        </form>
+
+        <p><a href="{{ url_for('logout') }}">Выйти в лобби</a></p>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        const chatBox = document.getElementById('chat');
+
+        socket.emit('join', { room: "{{ chat_name }}" });
+
+        function scrollChatToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        window.onload = scrollChatToBottom;
+
+        document.getElementById('sendForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const input = document.getElementById('msg');
+            const msg = input.value.trim();
+            if (msg !== "") {
+                socket.emit('send_message', {
+                    room: "{{ chat_name }}",
+                    message: msg
+                });
+                input.value = "";
+            }
+        });
+
+        socket.on('receive_message', function (data) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('msg');
+            msgDiv.classList.add(data.username === "{{ session['username'] }}" ? 'mine' : 'other');
+            msgDiv.innerHTML = data.username === "{{ session['username'] }}"
+                ? data.message
+                : `<strong>${data.username}:</strong> ${data.message}`;
+            chatBox.appendChild(msgDiv);
+            scrollChatToBottom();
+        });
+    </script>
+</body>
+</html>
