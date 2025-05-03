@@ -91,14 +91,18 @@ def lobby():
 def chat_password(chat_name):
     if 'user_id' not in session:
         return redirect('/login')
+    
     if request.method == 'POST':
         password = request.form['password']
-        cursor.execute("SELECT * FROM chat_rooms WHERE name=%s AND password=%s", (chat_name, password))
+        cursor.execute("SELECT * FROM chat_rooms WHERE LOWER(name) = %s", (chat_name.lower(),))
         room = cursor.fetchone()
-        if room:
+        if room and room['password'] == password:
             session['chat_id'] = room['id']
             session['chat_name'] = room['name']
             return redirect('/chatroom')
+        else:
+            return render_template('password_prompt.html', chat_name=chat_name, error="Неверный пароль")
+    
     return render_template('password_prompt.html', chat_name=chat_name)
 
 @app.route('/chatroom', methods=['GET', 'POST'])
