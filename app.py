@@ -8,7 +8,7 @@ app.secret_key = 'your_secret_key'
 db = mysql.connector.connect(
     host="sql7.freesqldatabase.com",
     user="sql7776627",
-    password="your_password",
+    password="CA4yivwFEt",
     database="sql7776627"
 )
 cursor = db.cursor(dictionary=True)
