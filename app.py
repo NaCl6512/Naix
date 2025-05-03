@@ -20,6 +20,7 @@ SFTP_BACKUP_DIR = '/public_html/naix_db'
 
 # === Бэкап-менеджер ===
 def backup_loop():
+    time.sleep(120)  # ждать 2 минуты перед первым бэкапом
     while True:
         try:
             if not os.path.exists(DATABASE):
@@ -166,7 +167,7 @@ def logout():
     session.pop('chat', None)
     return redirect(url_for('lobby'))
 
-# Запуск бэкапа в отдельном потоке
+# === Запуск бэкапа в отдельном потоке ===
 threading.Thread(target=backup_loop, daemon=True).start()
 
 if __name__ == '__main__':
