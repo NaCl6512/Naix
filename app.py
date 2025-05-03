@@ -1,117 +1,89 @@
-from flask import Flask, request, redirect, session, render_template, url_for
+from flask import Flask, render_template, request, redirect, session, url_for
 import mysql.connector
-import os
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Настройки подключения к MySQL
-db_config = {
-    'host': 'sql7.freesqldatabase.com',
-    'user': 'sql7776627',
-    'password': 'CA4yivwFEt',
-    'database': 'sql7776627',
-    'port': 3306
-}
-
-def get_db_connection():
-    return mysql.connector.connect(**db_config)
-
-@app.before_request
-def auto_login():
-    if 'username' not in session and request.endpoint not in ['login', 'register', 'static']:
-        return redirect(url_for('login'))
+db = mysql.connector.connect(
+    host="sql7.freesqldatabase.com",
+    user="sql7776627",
+    password="your_password",
+    database="sql7776627"
+)
+cursor = db.cursor(dictionary=True)
 
 @app.route('/')
-def lobby():
-    return render_template('lobby.html')
+def index():
+    return redirect('/login')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['username']
+        username = request.form['username']
         password = request.form['password']
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (name, password))
-            conn.commit()
-            session['username'] = name
-            return redirect(url_for('lobby'))
-        except mysql.connector.IntegrityError:
-            return "Имя пользователя уже занято"
-        finally:
-            cursor.close()
-            conn.close()
+        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
+        db.commit()
+        return redirect('/login')
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        name = request.form['username']
+        username = request.form['username']
         password = request.form['password']
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (name, password))
+        cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, password))
         user = cursor.fetchone()
-        cursor.close()
-        conn.close()
         if user:
-            session['username'] = name
-            return redirect(url_for('lobby'))
-        else:
-            return "Неверное имя или пароль"
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            return redirect('/lobby')
     return render_template('login.html')
 
-# Пароли чатов
-CHAT_PASSWORDS = {
-    'школа': '7z',
-    'домик': 'game',
-    'developer': 'dev'
-}
+@app.route('/lobby')
+def lobby():
+    if 'user_id' not in session:
+        return redirect('/login')
+    return render_template('lobby.html')
 
 @app.route('/chat/<chat_name>', methods=['GET', 'POST'])
-def chat(chat_name):
-    if chat_name not in CHAT_PASSWORDS:
-        return "Чат не существует"
+def chat_password(chat_name):
+    if 'user_id' not in session:
+        return redirect('/login')
+    if request.method == 'POST':
+        password = request.form['password']
+        cursor.execute("SELECT * FROM chat_rooms WHERE name=%s AND password=%s", (chat_name, password))
+        room = cursor.fetchone()
+        if room:
+            session['chat_id'] = room['id']
+            session['chat_name'] = room['name']
+            return redirect('/chatroom')
+    return render_template('password_prompt.html', chat_name=chat_name)
+
+@app.route('/chatroom', methods=['GET', 'POST'])
+def chatroom():
+    if 'user_id' not in session or 'chat_id' not in session:
+        return redirect('/login')
 
     if request.method == 'POST':
-        password = request.form.get('password')
-        if password != CHAT_PASSWORDS[chat_name]:
-            return "Неверный пароль"
-        session['chat'] = chat_name
-        return redirect(url_for('chat_room', chat_name=chat_name))
+        message = request.form['message']
+        cursor.execute("INSERT INTO messages (chat_id, user_id, text, timestamp) VALUES (%s, %s, %s, %s)", (
+            session['chat_id'], session['user_id'], message, datetime.now()))
+        db.commit()
 
-    return render_template('chat_password.html', chat_name=chat_name)
-
-@app.route('/room/<chat_name>', methods=['GET', 'POST'])
-def chat_room(chat_name):
-    if 'username' not in session or session.get('chat') != chat_name:
-        return redirect(url_for('lobby'))
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    if request.method == 'POST':
-        msg = request.form['message']
-        if msg.strip():
-            cursor.execute(
-                "INSERT INTO messages (chat, username, message) VALUES (%s, %s, %s)",
-                (chat_name, session['username'], msg)
-            )
-            conn.commit()
-
-    cursor.execute("SELECT username, message FROM messages WHERE chat=%s ORDER BY id ASC", (chat_name,))
-    messages = cursor.fetchall()  # список кортежей [(username, message), ...]
-    cursor.close()
-    conn.close()
-
-    return render_template('chat_room.html', chat_name=chat_name, messages=messages)
+    cursor.execute("""
+        SELECT m.*, u.username FROM messages m
+        JOIN users u ON m.user_id = u.id
+        WHERE chat_id = %s
+        ORDER BY timestamp ASC
+    """, (session['chat_id'],))
+    messages = cursor.fetchall()
+    return render_template('chat.html', messages=messages, username=session['username'], chat_name=session['chat_name'])
 
 @app.route('/logout')
 def logout():
-    session.pop('chat', None)
-    return redirect(url_for('lobby'))
+    session.clear()
+    return redirect('/login')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    app.run(debug=True)
