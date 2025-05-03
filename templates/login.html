@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Вход</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="center-box">
+    <div class="container">
         <h2>Вход</h2>
         <form method="post">
-            <input type="text" name="username" placeholder="Имя" required><br>
-            <input type="password" name="password" placeholder="Пароль" required><br>
+            <input type="text" name="username" placeholder="Имя пользователя" required>
+            <input type="password" name="password" placeholder="Пароль" required>
             <button type="submit">Войти</button>
         </form>
-        <p>Нет аккаунта? <a href="{{ url_for('register') }}">Регистрация</a></p>
+        <a href="/register">Создать аккаунт</a>
     </div>
 </body>
 </html>
