@@ -1,119 +1,75 @@
 body {
-margin: 0;
-padding: 0;
-font-family: 'Segoe UI', sans-serif;
-background: linear-gradient(to right, #667eea, #764ba2);
-color: #fff;
-overflow: hidden; /* ← ЭТО добавь */
-    height: 100vh;     /* ← И ЭТО тоже */
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
 }
 
-.center-box {
-width: 90%;
-max-width: 400px;
-margin: 80px auto;
-background: linear-gradient(to right, #667eea, #764ba2);
-padding: 30px;
-border-radius: 20px;
-text-align: center;
-box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+.container, .chat-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    width: 400px;
+    text-align: center;
 }
 
-input[type="text"],
-input[type="password"],
-button {
+input[type="text"], input[type="password"] {
     width: 90%;
     padding: 10px;
-    margin: 10px auto;  /* ← центрирует и делает отступы сверху и снизу */
-    border: none;
-    border-radius: 12px;
-    font-size: 17px;
-    display: block;     /* ← чтобы работало с auto-маргинами */
-}
-
-input[type="text"],
-input[type="password"] {
-background: #ffffffcc;
-color: #333;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
 }
 
 button {
-background: #4facfe;
-color: white;
-font-weight: bold;
-cursor: pointer;
-transition: 0.3s;
+    background: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 button:hover {
-background: #00f2fe;
+    background: #0056b3;
 }
 
-a {
-color: #ffd700;
-text-decoration: none;
+.chat-link, .logout {
+    display: inline-block;
+    margin: 10px;
+    color: #007bff;
+    text-decoration: none;
 }
 
-a:hover {
-text-decoration: underline;
+.chat-link:hover, .logout:hover {
+    text-decoration: underline;
 }
 
-.chat-list {
-list-style: none;
-padding: 0;
+.messages {
+    background: #f9f9f9;
+    padding: 10px;
+    height: 300px;
+    overflow-y: scroll;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    text-align: left;
 }
 
-.chat-list li {
-margin: 15px 0;
-background: #ffffffcc;
-border-radius: 12px;
-}
-
-.chat-list a {
-display: block;
-padding: 15px;
-font-size: 18px;
-color: #333;
-}
-
-.msg {
-max-width: 80%;
-padding: 8px 12px;
-margin: 6px 0;
-border-radius: 15px;
-word-wrap: break-word;
-clear: both;
-}
-
-.mine {
-background-color: #bde5ff;
-float: right;
-text-align: left;
-color: black;
-}
-
-.other {
-background-color: #ffffff;
-float: left;
-text-align: left;
-color: black;
-}
-
-.other strong {
-color: #0077cc;
-display: block;
-margin-bottom: 2px;
-}
-
-.chat-header {
-    margin-top: 10px;
-    background: linear-gradient(to right, #667eea, #764ba2);
-    color: white;
-    padding: 15px;
-    margin-bottom: 15px;
+.message {
+    margin: 10px 0;
+    padding: 10px;
     border-radius: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
+    max-width: 70%;
+}
+
+.message.own {
+    background: #d1e7dd;
+    margin-left: auto;
+    text-align: right;
+}
+
+.message.other {
+    background: #f8d7da;
+}
