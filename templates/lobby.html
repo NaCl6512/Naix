@@ -1,19 +1,16 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Лобби</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="center-box">
-        <h2>Добро пожаловать, {{ session['username'] }}</h2>
-        <h3>Выберите чат:</h3>
-        <ul class="chat-list">
-            <li><a href="{{ url_for('chat', chat_name='школа') }}">Чат - школа</a></li>
-            <li><a href="{{ url_for('chat', chat_name='домик') }}">Чат - домик</a></li>
-            <li><a href="{{ url_for('chat', chat_name='developer') }}">Чат - developer</a></li>
-        </ul>
+    <div class="container">
+        <h2>Выбор чата</h2>
+        <a href="/chat/школа" class="chat-link">Школа</a>
+        <a href="/chat/домик" class="chat-link">Домик</a>
+        <a href="/chat/developer" class="chat-link">Developer</a>
+        <a href="/logout" class="logout">Выйти</a>
     </div>
 </body>
 </html>
