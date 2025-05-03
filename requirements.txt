@@ -1,4 +1,6 @@
 Flask
-Flask-Session
-mysql-connector-python
+Flask-SocketIO
+pymysql
+eventlet
+python-dotenv
 gunicorn
